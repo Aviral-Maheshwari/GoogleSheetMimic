@@ -135,19 +135,60 @@ td {
 .function-menu {
   position: absolute;
   top: 50px;
-  left: 10px;
+  left: 600px;
   background-color: white;
-  border: 1px solid #ccc;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
   padding: 10px;
   z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 200px; /* Adjust width as needed */
+}
+
+.function-buttons {
+  margin-top: 20px; /* Space for the close button */
 }
 
 .function-menu button {
   display: block;
   width: 100%;
-  padding: 5px;
+  padding: 8px;
   margin-bottom: 5px;
+  background-color: #ffffff;
+  color: #202124;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.function-menu button:hover {
+  background-color: #f1f3f4;
+}
+
+
+.close-menu-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.close-menu-button:hover {
+  background-color: #cc0000;
 }
 /* Toolbar styles */
 .toolbar {
@@ -197,7 +238,7 @@ td {
 .chart-menu {
   position: absolute;
   top: 50px;
-  left: 10px;
+  left: 400px;
   background-color: white;
   border: 1px solid #ccc;
   padding: 10px;
@@ -208,9 +249,9 @@ td {
 }
 
 .chart-menu input {
-  padding: 5px;
+  padding: 1px;
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .chart-menu select {

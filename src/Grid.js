@@ -664,6 +664,12 @@ const Grid = () => {
       {/* Chart Menu */}
       {showChartMenu && (
         <div className="chart-menu">
+          <button
+            className="close-chart-menu"
+            onClick={() => setShowChartMenu(false)}
+          >
+            &times;
+          </button>
           <input
             type="text"
             placeholder="Enter Chart Title"
@@ -703,18 +709,31 @@ const Grid = () => {
       )}
       {showFunctionMenu && (
         <div className="function-menu">
-          <button onClick={() => handleFunctionSelect("SUM")}>SUM</button>
-          <button onClick={() => handleFunctionSelect("AVERAGE")}>
-            AVERAGE
+          {/* Close Button */}
+          <button
+            className="close-menu-button"
+            onClick={() => setShowFunctionMenu(false)}
+          >
+            ×
           </button>
-          <button onClick={() => handleFunctionSelect("MAX")}>MAX</button>
-          <button onClick={() => handleFunctionSelect("MIN")}>MIN</button>
-          <button onClick={() => handleFunctionSelect("COUNT")}>COUNT</button>
-          <button onClick={() => handleFunctionSelect("PRODUCT")}>
-            PRODUCT
-          </button>
-          <button onClick={() => handleFunctionSelect("STDEV")}>STDEV</button>
-          <button onClick={() => handleFunctionSelect("MEDIAN")}>MEDIAN</button>
+
+          {/* Function Buttons Container */}
+          <div className="function-buttons">
+            <button onClick={() => handleFunctionSelect("SUM")}>SUM</button>
+            <button onClick={() => handleFunctionSelect("AVERAGE")}>
+              AVERAGE
+            </button>
+            <button onClick={() => handleFunctionSelect("MAX")}>MAX</button>
+            <button onClick={() => handleFunctionSelect("MIN")}>MIN</button>
+            <button onClick={() => handleFunctionSelect("COUNT")}>COUNT</button>
+            <button onClick={() => handleFunctionSelect("PRODUCT")}>
+              PRODUCT
+            </button>
+            <button onClick={() => handleFunctionSelect("STDEV")}>STDEV</button>
+            <button onClick={() => handleFunctionSelect("MEDIAN")}>
+              MEDIAN
+            </button>
+          </div>
         </div>
       )}
       <div className="grid-container">
