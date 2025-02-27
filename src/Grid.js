@@ -10,6 +10,16 @@ const generateColumnNames = (cols) => {
 };
 
 const Grid = () => {
+  const getMixedState = (property, defaultValue) => {
+    if (selectedCells.length === 0) return false;
+    const firstValue =
+      formatting[selectedCells[0].row][selectedCells[0].col][property];
+    const allSame = selectedCells.every(
+      ({ row, col }) => formatting[row][col][property] === firstValue
+    );
+    return allSame ? firstValue === defaultValue : "mixed";
+  };
+
   const [chartData, setChartData] = useState(null);
   const [isChartVisible, setIsChartVisible] = useState(false);
   const [chartType, setChartType] = useState("bar"); // Default chart type
@@ -378,13 +388,19 @@ const Grid = () => {
   // Define the handlers for font size, text color, and background color
 
   const handleBold = () => {
-    applyFormattingToSelectedCells(
-      "fontWeight",
-      formatting[selectedCells[0].row][selectedCells[0].col]?.fontWeight ===
-        "bold"
-        ? "normal"
-        : "bold"
+    const newFormatting = formatting.map((row) => [...row]);
+    const currentState = selectedCells.every(
+      ({ row, col }) => newFormatting[row][col].fontWeight === "bold"
     );
+
+    selectedCells.forEach(({ row, col }) => {
+      newFormatting[row][col] = {
+        ...newFormatting[row][col],
+        fontWeight: currentState ? "normal" : "bold",
+      };
+    });
+
+    setFormatting(newFormatting);
   };
 
   const handleItalic = () => {
@@ -613,6 +629,9 @@ const Grid = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedCells, rows, cols]);
+  const isBoldActive = getMixedState("fontWeight", "bold");
+  const isItalicActive = getMixedState("fontStyle", "italic");
+  const isUnderlineActive = getMixedState("textDecoration", "underline");
 
   return (
     <div>
@@ -638,6 +657,9 @@ const Grid = () => {
         onSave={saveSpreadsheet}
         onLoad={loadSpreadsheet}
         onGenerateChart={() => setShowChartMenu(true)}
+        isBoldActive={isBoldActive}
+        isItalicActive={isItalicActive}
+        isUnderlineActive={isUnderlineActive}
       />
       {/* Chart Menu */}
       {showChartMenu && (

@@ -1,23 +1,51 @@
 /* Toolbar styles */
-.toolbar {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  background-color: #f4f4f4;
-  border-bottom: 1px solid #ddd;
-  margin-bottom: 20px; /* Add some space below the toolbar */
+/* Button feedback animations */
+.toolbar-button {
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.toolbar button {
-  padding: 5px 10px;
-  cursor: pointer;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  border-radius: 4px;
+.toolbar-button:active {
+  transform: scale(0.95);
 }
 
-.toolbar button:hover {
-  background-color: #f0f0f0;
+.toolbar-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.toolbar-button:active::after {
+  width: 120px;
+  height: 120px;
+}
+
+/* Active state styling */
+.toolbar-button.active {
+  background: #e8f0fe !important;
+  color: #1967d2 !important;
+  border-color: #1967d2 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-button.active strong,
+.toolbar-button.active em,
+.toolbar-button.active u {
+  color: #1967d2;
+}
+
+/* Google-style hover states */
+.toolbar-button:hover {
+  background: #f1f3f4;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 /* Heading styles */
@@ -213,24 +241,6 @@ canvas {
 /* Chart Container Styles */
 /* Chart Container Styles */
 .chart-container {
-  position: relative;
-  margin: 20px;
-  max-width: 800px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-/* Chart Container Styles */
-.chart-container {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -242,25 +252,49 @@ canvas {
   z-index: 1000;
 }
 
-/* Close Button Styles */
-.close-chart-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: #ff4444; /* Red background */
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+.toolbar-button {
+  position: relative;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  border: 1px solid #dadce0;
+  color: #5f6368;
 }
 
-.close-chart-button:hover {
-  background-color: #cc0000; /* Darker red on hover */
+/* Active State */
+.toolbar-button.active {
+  background: #e8f0fe !important;
+  border-color: #1967d2 !important;
+}
+
+.toolbar-button.active strong,
+.toolbar-button.active em,
+.toolbar-button.active u {
+  color: #1967d2 !important;
+}
+
+/* Mixed State */
+.toolbar-button.mixed {
+  background: #f8f9fa !important;
+  border-color: #dadce0 !important;
+}
+
+.toolbar-button.mixed::after {
+  content: "•";
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+  font-size: 12px;
+  color: #5f6368;
+  line-height: 1;
+}
+
+/* Hover States */
+.toolbar-button:hover:not(.active):not(.mixed) {
+  background: #f1f3f4;
+  border-color: #dadce0;
+}
+
+/* Click Animation */
+.toolbar-button:active {
+  transform: scale(0.95);
 }
