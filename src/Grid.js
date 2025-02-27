@@ -163,23 +163,66 @@ const Grid = () => {
     newData[row][col] = value;
     setData(newData);
   };
+  //focus input to next cell
+  const focusInput = (row, col) => {
+    // Find the input element for the specified cell
+    const inputElement = document.querySelector(
+      `td[row="${row}"][col="${col}"] input`
+    );
 
+    // Focus on the input element if it exists
+    if (inputElement) {
+      inputElement.focus();
+    }
+  };
   // Handle Enter key press
   const handleKeyDown = (e, row, col) => {
-    if (e.key === "Enter") {
-      const newData = [...data];
-      const cellValue = newData[row][col];
+    const { key } = e;
 
-      if (typeof cellValue === "string" && cellValue.startsWith("=")) {
-        try {
-          newData[row][col] = evaluateFormula(cellValue, newData);
-        } catch (error) {
-          newData[row][col] = "ERROR";
+    // Handle arrow key navigation
+    switch (key) {
+      case "ArrowUp":
+        if (row > 0) {
+          handleCellClick(row - 1, col, false); // Move to the cell above
+          focusInput(row - 1, col); // Focus on the input field of the new cell
         }
-      }
+        break;
+      case "ArrowDown":
+        if (row < rows - 1) {
+          handleCellClick(row + 1, col, false); // Move to the cell below
+          focusInput(row + 1, col); // Focus on the input field of the new cell
+        }
+        break;
+      case "ArrowLeft":
+        if (col > 0) {
+          handleCellClick(row, col - 1, false); // Move to the cell on the left
+          focusInput(row, col - 1); // Focus on the input field of the new cell
+        }
+        break;
+      case "ArrowRight":
+        if (col < cols - 1) {
+          handleCellClick(row, col + 1, false); // Move to the cell on the right
+          focusInput(row, col + 1); // Focus on the input field of the new cell
+        }
+        break;
+      case "Enter":
+        // Handle Enter key (existing logic)
+        const newData = [...data];
+        const cellValue = newData[row][col];
 
-      setData(newData);
-      setEditingCell(null);
+        if (typeof cellValue === "string" && cellValue.startsWith("=")) {
+          try {
+            newData[row][col] = evaluateFormula(cellValue, newData);
+          } catch (error) {
+            newData[row][col] = "ERROR";
+          }
+        }
+
+        setData(newData);
+        setEditingCell(null);
+        break;
+      default:
+        break;
     }
   };
 
@@ -756,15 +799,14 @@ const Grid = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                style={{ height: `${rowHeights[rowIndex]}px` }}
-              >
+            {data.map((rowData, rowIndex) => (
+              <tr key={rowIndex}>
                 <td>{rowIndex + 1}</td>
-                {row.map((cell, colIndex) => (
+                {rowData.map((cell, colIndex) => (
                   <td
                     key={colIndex}
+                    row={rowIndex}
+                    col={colIndex}
                     className={
                       selectedCells.some(
                         (cell) => cell.row === rowIndex && cell.col === colIndex
@@ -778,11 +820,6 @@ const Grid = () => {
                     style={{ position: "relative" }} // Ensure the parent <td> has relative positioning
                   >
                     <input
-                      type={
-                        formatting[rowIndex][colIndex].dataType === "number"
-                          ? "number"
-                          : "text"
-                      }
                       value={cell}
                       onChange={(e) =>
                         handleCellChange(rowIndex, colIndex, e.target.value)

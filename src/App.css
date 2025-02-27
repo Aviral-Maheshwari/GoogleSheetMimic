@@ -169,26 +169,27 @@ td {
 
 
 .close-menu-button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: #ff4444;
-  color: white;
+  position: flex;
+  top: 8px;  /* Adjusted for better positioning */
+  right: 8px; /* Adjusted for better positioning */
+  background-color: transparent; /* No background for a cleaner look */
+  color: #ff4444; /* Red color for the '×' */
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 16px;
+  width: 20px; /* Slightly smaller */
+  height: 20px; /* Slightly smaller */
+  font-size: 18px; /* Increased for better visibility */
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: background-color 0.3s ease;
+  transition: color 0.3s ease;
+  font-weight: bold;
 }
 
 .close-menu-button:hover {
-  background-color: #cc0000;
+  color: #cc0000; /* Darker red on hover */
 }
 /* Toolbar styles */
 .toolbar {
@@ -283,11 +284,12 @@ canvas {
 /* Chart Container Styles */
 .chart-container {
   position: fixed;
-  top: 50%;
+  top: 65%;
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: white;
   border: 1px solid #ccc;
+  border-radius: 13px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
   z-index: 1000;
