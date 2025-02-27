@@ -19,7 +19,8 @@ const Toolbar = ({
   onFindAndReplace,
   onDataTypeChange,
   onSave,
-  onLoad, // New prop for data type change
+  onLoad,
+  onGenerateChart, // New prop for data type change
 }) => {
   return (
     <div className="toolbar">
@@ -110,6 +111,9 @@ const Toolbar = ({
         <option value="number">Number</option>
         <option value="date">Date</option>
       </select>
+      <button onClick={onGenerateChart} title="Generate Chart">
+        Generate Chart
+      </button>
     </div>
   );
 };

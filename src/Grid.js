@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { evaluateFormula } from "./utils";
 import Toolbar from "./toolbar";
+import ChartComponent from "./charts";
+import useClickOutside from "./useClickOutsie";
 
 const generateColumnNames = (cols) => {
   return Array.from({ length: cols }, (_, i) => String.fromCharCode(65 + i));
@@ -9,7 +11,9 @@ const generateColumnNames = (cols) => {
 
 const Grid = () => {
   const [chartData, setChartData] = useState(null);
+  const [isChartVisible, setIsChartVisible] = useState(false);
   const [chartType, setChartType] = useState("bar"); // Default chart type
+  const [chartTitle, setChartTitle] = useState("Chart Title"); // Chart title
   const [showChartMenu, setShowChartMenu] = useState(false);
   const [rows, setRows] = useState(25);
   const [cols, setCols] = useState(15);
@@ -36,6 +40,7 @@ const Grid = () => {
       })
     )
   );
+
   const [showFunctionMenu, setShowFunctionMenu] = useState(false);
   const [editingCell, setEditingCell] = useState(null);
   const gridRef = useRef(null);
@@ -43,6 +48,44 @@ const Grid = () => {
   const [dataTypes, setDataTypes] = useState(
     Array.from({ length: rows }, () => Array(cols).fill("text")) // Default to text
   );
+  const chartRef = useRef(null);
+
+  // Close the chart when clicking outside
+  useClickOutside(chartRef, () => {
+    setIsChartVisible(false);
+  });
+
+  const generateChart = () => {
+    if (selectedCells.length < 2) {
+      alert("Please select at least two cells to generate a chart.");
+      return;
+    }
+
+    const labels = [];
+    const values = [];
+
+    // Use a Set to ensure labels are unique
+    const uniqueLabels = new Set();
+
+    selectedCells.forEach(({ row, col }) => {
+      const label = `${String.fromCharCode(65 + col)}${row + 1}`; // Convert column index to letter (A, B, C, etc.)
+      if (!uniqueLabels.has(label)) {
+        uniqueLabels.add(label);
+        labels.push(label);
+        values.push(parseFloat(data[row][col]) || 0); // Convert cell value to a number
+      }
+    });
+
+    setChartData({ labels, values });
+    setIsChartVisible(true); // Show the chart
+    setShowChartMenu(false); // Hide the chart menu after generating the chart
+  };
+  const handleChartTypeChange = (type) => {
+    setChartType(type);
+  };
+  const handleChartTitleChange = (e) => {
+    setChartTitle(e.target.value);
+  };
 
   const saveSpreadsheet = () => {
     const spreadsheetData = {
@@ -594,7 +637,33 @@ const Grid = () => {
         onDataTypeChange={handleDataTypeChange}
         onSave={saveSpreadsheet}
         onLoad={loadSpreadsheet}
+        onGenerateChart={() => setShowChartMenu(true)}
       />
+      {/* Chart Menu */}
+      {showChartMenu && (
+        <div className="chart-menu">
+          <input
+            type="text"
+            placeholder="Enter Chart Title"
+            value={chartTitle}
+            onChange={handleChartTitleChange}
+          />
+          <select
+            value={chartType}
+            onChange={(e) => handleChartTypeChange(e.target.value)}
+          >
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="doughnut">Doughnut Chart</option>
+            <option value="radar">Radar Chart</option>
+          </select>
+          <button onClick={generateChart}>Generate Chart</button>
+        </div>
+      )}
+      {chartData && (
+        <ChartComponent data={chartData} type={chartType} title={chartTitle} />
+      )}
       {showFunctionMenu && (
         <div className="function-menu">
           <button onClick={() => handleFunctionSelect("SUM")}>SUM</button>
