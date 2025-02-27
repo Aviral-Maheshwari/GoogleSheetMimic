@@ -1,3 +1,37 @@
+/* Toolbar styles */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px; /* Add some space below the toolbar */
+}
+
+.toolbar button {
+  padding: 5px 10px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.toolbar button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Heading styles */
+h1 {
+  text-align: center;
+  margin-bottom: 20px; /* Add some space below the heading */
+}
+
+/* Grid styles */
+.grid-container {
+  height: calc(100vh - 60px); /* Set a fixed height for the grid container */
+  overflow: auto; /* Make the grid scrollable */
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
@@ -13,7 +47,9 @@ input {
   border: none;
   outline: none;
 }
-th, td {
+
+th,
+td {
   position: relative;
 }
 
@@ -30,17 +66,76 @@ th, td {
 .resizer:hover {
   background: #00bcd4; /* Highlight color on hover */
 }
+
 .selected {
   background-color: #e0f7fa; /* Light blue background */
   border: 0.5px solid #00bcd4; /* Blue border */
 }
 
+.selecting-cursor {
+  cursor: cell; /* Default cursor for selection */
+}
+
+/* Add this rule to change the cursor to a plus sign when hovering over cells during selection */
+.selecting-cursor td {
+  cursor: cell;
+}
+
+/* Add this rule to style the plus cursor when hovering over the grid */
+.selecting-cursor .selected {
+  cursor: cell;
+}
+
+.selection-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  background-color: #00bcd4; /* Blue color */
+  border-radius: 50%; /* Circular handle */
+  cursor: crosshair; /* Cross cursor to indicate dragging */
+  display: none; /* Hidden by default */
+}
+
+/* Show the selection indicator only when a cell is selected */
+.selected .selection-indicator {
+  display: block;
+}
+
+/* Function menu styles */
+.function-menu {
+  position: absolute;
+  top: 50px;
+  left: 10px;
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.function-menu button {
+  display: block;
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+/* Toolbar styles */
 .toolbar {
   display: flex;
   gap: 10px;
   padding: 10px;
   background-color: #f4f4f4;
   border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Allow buttons to wrap to the next line if needed */
+}
+
+.styling-group {
+  display: flex;
+  gap: 10px;
+  align-items: center; /* Align buttons and inputs vertically */
 }
 
 .toolbar button {
@@ -49,8 +144,25 @@ th, td {
   border: 1px solid #ccc;
   background-color: #fff;
   border-radius: 4px;
+  margin-right: 5px;
 }
 
 .toolbar button:hover {
   background-color: #f0f0f0;
+}
+
+.toolbar input[type="color"] {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toolbar input[type="number"] {
+  width: 80px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

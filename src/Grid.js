@@ -8,39 +8,153 @@ const generateColumnNames = (cols) => {
 };
 
 const Grid = () => {
-  const [rows, setRows] = useState(10);
-  const [cols, setCols] = useState(10);
+  const [chartData, setChartData] = useState(null);
+  const [chartType, setChartType] = useState("bar"); // Default chart type
+  const [showChartMenu, setShowChartMenu] = useState(false);
+  const [rows, setRows] = useState(25);
+  const [cols, setCols] = useState(15);
   const [data, setData] = useState(
     Array.from({ length: rows }, () => Array(cols).fill(""))
   );
-  const [selectedCell, setSelectedCell] = useState({ row: 0, col: 0 });
+  const [selectedCells, setSelectedCells] = useState([]);
+  const [isSelecting, setIsSelecting] = useState(false);
   const [columnWidths, setColumnWidths] = useState(
     Array.from({ length: cols }, () => 100)
   );
-  const [formatting, setFormatting] = useState(
-    Array.from({ length: rows }, () => Array(cols).fill({}))
+  const [rowHeights, setRowHeights] = useState(
+    Array.from({ length: rows }, () => 30)
   );
+  const [formatting, setFormatting] = useState(
+    Array.from({ length: rows }, () =>
+      Array(cols).fill({
+        fontWeight: "normal",
+        fontStyle: "normal",
+        textDecoration: "none",
+        fontSize: "16px",
+        color: "#000000",
+        backgroundColor: "#ffffff", // Default background color
+      })
+    )
+  );
+  const [showFunctionMenu, setShowFunctionMenu] = useState(false);
+  const [editingCell, setEditingCell] = useState(null);
   const gridRef = useRef(null);
   const columnNames = generateColumnNames(cols);
+  const [dataTypes, setDataTypes] = useState(
+    Array.from({ length: rows }, () => Array(cols).fill("text")) // Default to text
+  );
+
+  const saveSpreadsheet = () => {
+    const spreadsheetData = {
+      rows,
+      cols,
+      data,
+      columnWidths,
+      rowHeights,
+      formatting,
+      dataTypes,
+    };
+    localStorage.setItem("spreadsheetData", JSON.stringify(spreadsheetData));
+    alert("Spreadsheet saved successfully!");
+  };
+
+  // Load spreadsheet data
+  const loadSpreadsheet = () => {
+    const savedData = localStorage.getItem("spreadsheetData");
+    if (savedData) {
+      const {
+        rows: savedRows,
+        cols: savedCols,
+        data: loadedData, // Change this variable name to avoid conflict
+        columnWidths: savedColumnWidths,
+        rowHeights: savedRowHeights,
+        formatting: savedFormatting,
+        dataTypes: savedDataTypes,
+      } = JSON.parse(savedData);
+
+      setRows(savedRows);
+      setCols(savedCols);
+      setData(loadedData); // Use the new variable name here
+      setColumnWidths(savedColumnWidths);
+      setRowHeights(savedRowHeights);
+      setFormatting(savedFormatting);
+      setDataTypes(savedDataTypes);
+
+      alert("Spreadsheet loaded successfully!");
+    } else {
+      alert("No saved data found.");
+    }
+  };
 
   // Handle cell value change
   const handleCellChange = (row, col, value) => {
     const newData = [...data];
-    newData[row][col] = value;
+    const newDataTypes = [...dataTypes];
 
-    // Re-evaluate all cells to update formula dependencies
-    for (let i = 0; i < rows; i++) {
-      for (let j = 0; j < cols; j++) {
-        if (newData[i][j].startsWith("=")) {
-          try {
-            newData[i][j] = evaluateFormula(newData[i][j], newData);
-          } catch (error) {
-            newData[i][j] = "ERROR";
-          }
-        }
+    // Validate based on data type
+    const expectedType = newDataTypes[row][col];
+
+    if (expectedType === "number" && isNaN(value)) {
+      alert("Please enter a valid number.");
+      return; // Prevent invalid input
+    }
+
+    if (expectedType === "date") {
+      const date = new Date(value);
+      if (isNaN(date.getTime())) {
+        alert("Please enter a valid date.");
+        return; // Prevent invalid input
       }
     }
 
+    newData[row][col] = value;
+    setData(newData);
+  };
+
+  // Handle Enter key press
+  const handleKeyDown = (e, row, col) => {
+    if (e.key === "Enter") {
+      const newData = [...data];
+      const cellValue = newData[row][col];
+
+      if (typeof cellValue === "string" && cellValue.startsWith("=")) {
+        try {
+          newData[row][col] = evaluateFormula(cellValue, newData);
+        } catch (error) {
+          newData[row][col] = "ERROR";
+        }
+      }
+
+      setData(newData);
+      setEditingCell(null);
+    }
+  };
+
+  // Handle cell blur
+  const handleCellBlur = (row, col) => {
+    const newData = [...data];
+    const cellValue = newData[row][col];
+
+    if (typeof cellValue === "string" && cellValue.startsWith("=")) {
+      try {
+        newData[row][col] = evaluateFormula(cellValue, newData);
+      } catch (error) {
+        newData[row][col] = "ERROR";
+      }
+    }
+
+    setData(newData);
+    setEditingCell(null);
+  };
+
+  // Handle Delete key press
+  const handleDelete = () => {
+    if (selectedCells.length === 0) return;
+
+    const newData = [...data];
+    selectedCells.forEach(({ row, col }) => {
+      newData[row][col] = ""; // Clear the cell value
+    });
     setData(newData);
   };
 
@@ -81,62 +195,372 @@ const Grid = () => {
     };
   }, [columnWidths]);
 
-  // Formatting handlers
-  const handleBold = () => {
-    const { row, col } = selectedCell;
-    const newFormatting = [...formatting];
-    newFormatting[row][col] = {
-      ...newFormatting[row][col],
-      fontWeight:
-        newFormatting[row][col].fontWeight === "bold" ? "normal" : "bold",
+  // Handle row resizing
+  useEffect(() => {
+    if (!gridRef.current) return;
+
+    const rowResizers = gridRef.current.querySelectorAll(".row-resizer");
+
+    const handleMouseDown = (index) => (e) => {
+      let startY = e.clientY;
+      let startHeight = rowHeights[index];
+
+      const handleMouseMove = (e) => {
+        const newHeight = Math.max(30, startHeight + (e.clientY - startY));
+        const newRowHeights = [...rowHeights];
+        newRowHeights[index] = newHeight;
+        setRowHeights(newRowHeights);
+      };
+
+      const handleMouseUp = () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     };
+
+    rowResizers.forEach((resizer, index) => {
+      resizer.addEventListener("mousedown", handleMouseDown(index));
+    });
+
+    return () => {
+      rowResizers.forEach((resizer, index) => {
+        resizer.removeEventListener("mousedown", handleMouseDown(index));
+      });
+    };
+  }, [rowHeights]);
+
+  // Handle cell selection
+  const handleCellClick = (row, col, isShiftKey) => {
+    if (isShiftKey) {
+      // Add to selection range
+      setSelectedCells((prev) => [...prev, { row, col }]);
+    } else {
+      // Start new selection
+      setSelectedCells([{ row, col }]);
+    }
+  };
+
+  // Handle mouse drag for selection
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      if (e.target.tagName === "INPUT") return; // Ignore clicks on input fields
+      setIsSelecting(true);
+    };
+
+    const handleMouseUp = () => {
+      setIsSelecting(false);
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isSelecting) return;
+
+      const cell = e.target.closest("td");
+      if (cell) {
+        const row = parseInt(cell.parentElement.firstChild.textContent) - 1;
+        const col = Array.from(cell.parentElement.children).indexOf(cell) - 1;
+        handleCellClick(row, col, true); // Add to selection
+      }
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [isSelecting]);
+
+  // Handle Delete key press
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Delete") {
+        handleDelete();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedCells]); // Re-run effect when selectedCells changes
+
+  // Add a new row
+  const addRow = () => {
+    setRows((prev) => prev + 1);
+    setData((prev) => [...prev, Array(cols).fill("")]);
+    setRowHeights((prev) => [...prev, 30]); // Default row height
+  };
+
+  // Delete the last row
+  const deleteRow = () => {
+    if (rows === 1) return; // Prevent deleting all rows
+    setRows((prev) => prev - 1);
+    setData((prev) => prev.slice(0, -1));
+    setRowHeights((prev) => prev.slice(0, -1));
+  };
+
+  // Add a new column
+  const addColumn = () => {
+    setCols((prev) => prev + 1);
+    setData((prev) => prev.map((row) => [...row, ""]));
+    setColumnWidths((prev) => [...prev, 100]); // Default column width
+  };
+
+  // Delete the last column
+  const deleteColumn = () => {
+    if (cols === 1) return; // Prevent deleting all columns
+    setCols((prev) => prev - 1);
+    setData((prev) => prev.map((row) => row.slice(0, -1)));
+    setColumnWidths((prev) => prev.slice(0, -1));
+  };
+
+  // Formatting handlers (apply to all selected cells)
+  const applyFormattingToSelectedCells = (styleKey, value) => {
+    const newFormatting = [...formatting];
+    selectedCells.forEach(({ row, col }) => {
+      newFormatting[row][col] = {
+        ...newFormatting[row][col],
+        [styleKey]: value,
+      };
+    });
     setFormatting(newFormatting);
+  };
+
+  // Grid.js
+
+  // Define the handlers for font size, text color, and background color
+
+  const handleBold = () => {
+    applyFormattingToSelectedCells(
+      "fontWeight",
+      formatting[selectedCells[0].row][selectedCells[0].col]?.fontWeight ===
+        "bold"
+        ? "normal"
+        : "bold"
+    );
   };
 
   const handleItalic = () => {
-    const { row, col } = selectedCell;
-    const newFormatting = [...formatting];
-    newFormatting[row][col] = {
-      ...newFormatting[row][col],
-      fontStyle:
-        newFormatting[row][col].fontStyle === "italic" ? "normal" : "italic",
-    };
-    setFormatting(newFormatting);
+    applyFormattingToSelectedCells(
+      "fontStyle",
+      formatting[selectedCells[0].row][selectedCells[0].col]?.fontStyle ===
+        "italic"
+        ? "normal"
+        : "italic"
+    );
   };
 
   const handleUnderline = () => {
-    const { row, col } = selectedCell;
-    const newFormatting = [...formatting];
-    newFormatting[row][col] = {
-      ...newFormatting[row][col],
-      textDecoration:
-        newFormatting[row][col].textDecoration === "underline"
-          ? "none"
-          : "underline",
-    };
-    setFormatting(newFormatting);
+    applyFormattingToSelectedCells(
+      "textDecoration",
+      formatting[selectedCells[0].row][selectedCells[0].col]?.textDecoration ===
+        "underline"
+        ? "none"
+        : "underline"
+    );
   };
 
+  const handleFontSizeChange = (size) => {
+    applyFormattingToSelectedCells("fontSize", size);
+  };
+
+  const handleColorChange = (color) => {
+    applyFormattingToSelectedCells("color", color);
+  };
+
+  const handleBackgroundColorChange = (backgroundColor) => {
+    applyFormattingToSelectedCells("backgroundColor", backgroundColor);
+  };
+
+  // Handle insert function
   const handleInsertFunction = () => {
-    alert("Insert Function button clicked");
+    setShowFunctionMenu(true); // Show function menu
+  };
+
+  // Handle function selection
+  const handleFunctionSelect = (func) => {
+    if (selectedCells.length === 0) return;
+
+    const { row, col } = selectedCells[0]; // Use the first selected cell
+    const newData = [...data];
+    newData[row][col] = `=${func}()`; // Insert the function
+    setData(newData);
+    setShowFunctionMenu(false); // Hide function menu
+  };
+
+  const handleTrim = () => {
+    if (selectedCells.length === 0) {
+      alert("Please select cells first!");
+      return;
+    }
+
+    const newData = [...data];
+    selectedCells.forEach(({ row, col }) => {
+      newData[row][col] = newData[row][col].trim();
+    });
+    setData(newData);
+  };
+
+  const handleUpper = () => {
+    if (selectedCells.length === 0) {
+      alert("Please select cells first!");
+      return;
+    }
+
+    const newData = [...data];
+    selectedCells.forEach(({ row, col }) => {
+      newData[row][col] = newData[row][col].toUpperCase();
+    });
+    setData(newData);
+  };
+
+  const handleLower = () => {
+    if (selectedCells.length === 0) {
+      alert("Please select cells first!");
+      return;
+    }
+
+    const newData = [...data];
+    selectedCells.forEach(({ row, col }) => {
+      newData[row][col] = newData[row][col].toLowerCase();
+    });
+    setData(newData);
+  };
+
+  const handleRemoveDuplicates = () => {
+    if (selectedCells.length === 0) {
+      alert("No range selected. Please select a range first.");
+      return;
+    }
+
+    // Determine unique row indices in the selected range
+    const selectedRows = Array.from(
+      new Set(selectedCells.map(({ row }) => row))
+    ).sort((a, b) => a - b);
+
+    if (selectedRows.length === 0) {
+      alert("No valid rows selected.");
+      return;
+    }
+
+    // Create a set to store unique rows
+    const uniqueRows = new Set();
+    const newData = [...data]; // Copy of the grid
+
+    // Track rows that should be removed
+    let hasDuplicates = false;
+    const filteredRows = [];
+
+    for (const rowIndex of selectedRows) {
+      const rowString = JSON.stringify(data[rowIndex]);
+
+      if (!uniqueRows.has(rowString)) {
+        uniqueRows.add(rowString);
+        filteredRows.push(data[rowIndex]); // Keep unique row
+      } else {
+        hasDuplicates = true; // Found a duplicate
+      }
+    }
+
+    if (!hasDuplicates) {
+      alert("No duplicate rows found in the selected range.");
+      return;
+    }
+
+    // Replace selected rows with unique ones while keeping the grid structure
+    let newRowIndex = 0;
+    for (const rowIndex of selectedRows) {
+      newData[rowIndex] =
+        filteredRows[newRowIndex] || Array(data[rowIndex].length).fill(""); // Fill removed rows with empty arrays
+      newRowIndex++;
+    }
+
+    setData(newData);
+  };
+
+  const handleDataTypeChange = (type) => {
+    const newDataTypes = [...dataTypes];
+    selectedCells.forEach(({ row, col }) => {
+      newDataTypes[row][col] = type;
+    });
+    setDataTypes(newDataTypes);
+  };
+
+  const handleFindAndReplace = () => {
+    // Prompt the user for the text to find
+    const find = prompt("Enter text to find:");
+    if (!find) return; // Exit if the user cancels or enters nothing
+
+    // Prompt the user for the text to replace with
+    const replace = prompt("Enter text to replace with:");
+    if (!replace) return; // Exit if the user cancels or enters nothing
+
+    // Ask the user if they want to apply to selected cells or the entire grid
+    const applyTo = prompt("Apply to: (1) Selected Cells, (2) Entire Grid");
+    if (!applyTo) return; // Exit if the user cancels
+
+    // Create a copy of the data to avoid direct state mutation
+    const newData = [...data];
+
+    if (applyTo === "1") {
+      // Apply to selected cells
+      if (selectedCells.length === 0) {
+        alert("Please select cells first!");
+        return;
+      }
+
+      selectedCells.forEach(({ row, col }) => {
+        if (newData[row][col].includes(find)) {
+          newData[row][col] = newData[row][col].replace(
+            new RegExp(find, "g"),
+            replace
+          );
+        }
+      });
+    } else if (applyTo === "2") {
+      // Apply to the entire grid
+      for (let row = 0; row < newData.length; row++) {
+        for (let col = 0; col < newData[row].length; col++) {
+          if (newData[row][col].includes(find)) {
+            newData[row][col] = newData[row][col].replace(
+              new RegExp(find, "g"),
+              replace
+            );
+          }
+        }
+      }
+    } else {
+      alert("Invalid option!");
+      return;
+    }
+
+    // Update the state with the modified data
+    setData(newData);
   };
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      const { row, col } = selectedCell;
+      const { row, col } = selectedCells[selectedCells.length - 1] || {
+        row: 0,
+        col: 0,
+      };
       switch (e.key) {
         case "ArrowUp":
-          if (row > 0) setSelectedCell({ row: row - 1, col });
+          if (row > 0) handleCellClick(row - 1, col, e.shiftKey);
           break;
         case "ArrowDown":
-          if (row < rows - 1) setSelectedCell({ row: row + 1, col });
+          if (row < rows - 1) handleCellClick(row + 1, col, e.shiftKey);
           break;
         case "ArrowLeft":
-          if (col > 0) setSelectedCell({ row, col: col - 1 });
+          if (col > 0) handleCellClick(row, col - 1, e.shiftKey);
           break;
         case "ArrowRight":
-          if (col < cols - 1) setSelectedCell({ row, col: col + 1 });
+          if (col < cols - 1) handleCellClick(row, col + 1, e.shiftKey);
           break;
         default:
           break;
@@ -145,73 +569,130 @@ const Grid = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedCell, rows, cols]);
+  }, [selectedCells, rows, cols]);
 
   return (
     <div>
+      <h1>Google Sheets Clone</h1>
       <Toolbar
         onBold={handleBold}
         onItalic={handleItalic}
         onUnderline={handleUnderline}
         onInsertFunction={handleInsertFunction}
+        onAddRow={addRow}
+        onDeleteRow={deleteRow}
+        onAddColumn={addColumn}
+        onDeleteColumn={deleteColumn}
+        onFontSizeChange={handleFontSizeChange}
+        onColorChange={handleColorChange}
+        onBackgroundColorChange={handleBackgroundColorChange}
+        onTrim={handleTrim}
+        onUpper={handleUpper}
+        onLower={handleLower}
+        onRemoveDuplicates={handleRemoveDuplicates}
+        onFindAndReplace={handleFindAndReplace}
+        onDataTypeChange={handleDataTypeChange}
+        onSave={saveSpreadsheet}
+        onLoad={loadSpreadsheet}
       />
-      <table ref={gridRef}>
-        <thead>
-          <tr>
-            <th></th>
-            {columnNames.map((name, colIndex) => (
-              <th
-                key={colIndex}
-                style={{
-                  width: `${columnWidths[colIndex]}px`,
-                  position: "relative",
-                }}
-              >
-                {name}
-                <div className="resizer"></div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              <td>{rowIndex + 1}</td>
-              {row.map((cell, colIndex) => (
-                <td
+      {showFunctionMenu && (
+        <div className="function-menu">
+          <button onClick={() => handleFunctionSelect("SUM")}>SUM</button>
+          <button onClick={() => handleFunctionSelect("AVERAGE")}>
+            AVERAGE
+          </button>
+          <button onClick={() => handleFunctionSelect("MAX")}>MAX</button>
+          <button onClick={() => handleFunctionSelect("MIN")}>MIN</button>
+          <button onClick={() => handleFunctionSelect("COUNT")}>COUNT</button>
+          <button onClick={() => handleFunctionSelect("PRODUCT")}>
+            PRODUCT
+          </button>
+          <button onClick={() => handleFunctionSelect("STDEV")}>STDEV</button>
+          <button onClick={() => handleFunctionSelect("MEDIAN")}>MEDIAN</button>
+        </div>
+      )}
+      <div className="grid-container">
+        <table ref={gridRef}>
+          <thead>
+            <tr>
+              <th></th>
+              {columnNames.map((name, colIndex) => (
+                <th
                   key={colIndex}
                   style={{
                     width: `${columnWidths[colIndex]}px`,
-                    fontWeight: formatting[rowIndex][colIndex].fontWeight,
-                    fontStyle: formatting[rowIndex][colIndex].fontStyle,
-                    textDecoration:
-                      formatting[rowIndex][colIndex].textDecoration,
+                    position: "relative",
                   }}
-                  className={
-                    rowIndex === selectedCell.row &&
-                    colIndex === selectedCell.col
-                      ? "selected"
-                      : ""
-                  }
-                  onClick={() =>
-                    setSelectedCell({ row: rowIndex, col: colIndex })
-                  }
                 >
-                  <input
-                    value={cell}
-                    onChange={(e) =>
-                      handleCellChange(rowIndex, colIndex, e.target.value)
-                    }
-                    onFocus={() =>
-                      setSelectedCell({ row: rowIndex, col: colIndex })
-                    }
-                  />
-                </td>
+                  {name}
+                  <div className="resizer"></div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                style={{ height: `${rowHeights[rowIndex]}px` }}
+              >
+                <td>{rowIndex + 1}</td>
+                {row.map((cell, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className={
+                      selectedCells.some(
+                        (cell) => cell.row === rowIndex && cell.col === colIndex
+                      )
+                        ? "selected"
+                        : ""
+                    }
+                    onClick={(e) =>
+                      handleCellClick(rowIndex, colIndex, e.shiftKey)
+                    }
+                    style={{ position: "relative" }} // Ensure the parent <td> has relative positioning
+                  >
+                    <input
+                      type={
+                        formatting[rowIndex][colIndex].dataType === "number"
+                          ? "number"
+                          : "text"
+                      }
+                      value={cell}
+                      onChange={(e) =>
+                        handleCellChange(rowIndex, colIndex, e.target.value)
+                      }
+                      onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+                      onBlur={() => handleCellBlur(rowIndex, colIndex)}
+                      onFocus={() => {
+                        handleCellClick(rowIndex, colIndex, false);
+                        setEditingCell({ row: rowIndex, col: colIndex });
+                      }}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        outline: "none",
+                        fontWeight: formatting[rowIndex][colIndex].fontWeight,
+                        fontStyle: formatting[rowIndex][colIndex].fontStyle,
+                        textDecoration:
+                          formatting[rowIndex][colIndex].textDecoration,
+                        fontSize: formatting[rowIndex][colIndex].fontSize,
+                        color: formatting[rowIndex][colIndex].color,
+                        backgroundColor:
+                          formatting[rowIndex][colIndex].backgroundColor,
+                      }}
+                    />
+                    {/* Plus symbol for dragging appears at the bottom-right corner */}
+                    {selectedCells.some(
+                      (cell) => cell.row === rowIndex && cell.col === colIndex
+                    ) && <div className="selection-indicator"></div>}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

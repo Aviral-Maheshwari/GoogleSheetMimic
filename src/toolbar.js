@@ -5,33 +5,111 @@ const Toolbar = ({
   onItalic,
   onUnderline,
   onInsertFunction,
-  isBoldActive,
-  isItalicActive,
-  isUnderlineActive,
+  onAddRow,
+  onDeleteRow,
+  onAddColumn,
+  onDeleteColumn,
+  onFontSizeChange,
+  onColorChange,
+  onBackgroundColorChange,
+  onTrim,
+  onUpper,
+  onLower,
+  onRemoveDuplicates,
+  onFindAndReplace,
+  onDataTypeChange,
+  onSave,
+  onLoad, // New prop for data type change
 }) => {
   return (
     <div className="toolbar">
-      <button
-        onClick={onBold}
-        style={{ fontWeight: isBoldActive ? "bold" : "normal" }}
-      >
-        B
+      {/* Styling Buttons */}
+      <button onClick={onSave} title="Save Spreadsheet">
+        Save
       </button>
-      <button
-        onClick={onItalic}
-        style={{ fontStyle: isItalicActive ? "italic" : "normal" }}
-      >
-        I
+      <button onClick={onLoad} title="Load Spreadsheet">
+        Load
       </button>
-      <button
-        onClick={onUnderline}
-        style={{
-          textDecoration: isUnderlineActive ? "underline" : "none",
-        }}
-      >
-        U
+      <button onClick={onBold} title="Bold">
+        <strong>B</strong>
       </button>
-      <button onClick={onInsertFunction}>Insert Function</button>
+      <button onClick={onItalic} title="Italic">
+        <em>I</em>
+      </button>
+      <button onClick={onUnderline} title="Underline">
+        <u>U</u>
+      </button>
+
+      {/* Data Quality Buttons */}
+      <button onClick={onTrim} title="Trim">
+        TRIM
+      </button>
+      <button onClick={onUpper} title="UPPER">
+        UPPER
+      </button>
+      <button onClick={onLower} title="LOWER">
+        LOWER
+      </button>
+      <button onClick={onRemoveDuplicates} title="Remove Duplicates">
+        REMOVE DUPLICATES
+      </button>
+      <button onClick={onFindAndReplace} title="Find and Replace">
+        FIND & REPLACE
+      </button>
+
+      {/* Other Toolbar Buttons */}
+      <button onClick={onInsertFunction} title="Insert Function">
+        Insert Function
+      </button>
+      <button onClick={onAddRow} title="Add Row">
+        Add Row
+      </button>
+      <button onClick={onDeleteRow} title="Delete Row">
+        Delete Row
+      </button>
+      <button onClick={onAddColumn} title="Add Column">
+        Add Column
+      </button>
+      <button onClick={onDeleteColumn} title="Delete Column">
+        Delete Column
+      </button>
+
+      {/* Font Size Input */}
+      <input
+        type="number"
+        min="10"
+        max="72"
+        defaultValue="16"
+        onChange={(e) => onFontSizeChange(e.target.value + "px")}
+        placeholder="Font Size"
+        title="Font Size"
+      />
+
+      {/* Text Color Picker */}
+      <input
+        type="color"
+        defaultValue="#000000"
+        onChange={(e) => onColorChange(e.target.value)}
+        title="Text Color"
+      />
+
+      {/* Background Color Picker */}
+      <input
+        type="color"
+        defaultValue="#ffffff"
+        onChange={(e) => onBackgroundColorChange(e.target.value)}
+        title="Background Color"
+      />
+
+      {/* Data Type Selector */}
+      <select
+        onChange={(e) => onDataTypeChange(e.target.value)}
+        title="Data Type"
+      >
+        <option value="text">Text</option>
+        <option value="number">Number</option>
+        <option value="date">Date</option>
+      </select>
     </div>
   );
 };
