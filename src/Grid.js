@@ -661,8 +661,23 @@ const Grid = () => {
           <button onClick={generateChart}>Generate Chart</button>
         </div>
       )}
-      {chartData && (
-        <ChartComponent data={chartData} type={chartType} title={chartTitle} />
+
+      {isChartVisible && (
+        <div ref={chartRef} className="chart-container">
+          {/* Close Button */}
+          <button
+            className="close-chart-button"
+            onClick={() => setIsChartVisible(false)}
+          >
+            ×
+          </button>
+          {/* Chart Component */}
+          <ChartComponent
+            data={chartData}
+            type={chartType}
+            title={chartTitle}
+          />
+        </div>
       )}
       {showFunctionMenu && (
         <div className="function-menu">
