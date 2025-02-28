@@ -679,7 +679,7 @@ const Grid = () => {
   return (
     <div>
       <h1>Google Sheets Clone</h1>
-      <h1 class="developer-heading">Crafted by Aviral Maheshwari.</h1>
+      <h1 class="developer-heading"> Crafted by Aviral Maheshwari</h1>
       <Toolbar
         onBold={handleBold}
         onItalic={handleItalic}
