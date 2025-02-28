@@ -1,37 +1,31 @@
-#!/bin/bash
+# SheetMaster - Google Sheets Clone
 
-# Define the content of the README.md file
-read -r -d '' README_CONTENT << 'EOF'
-# GoogleSheetClone App
+![SheetMaster Demo](demo-screenshot.png)  
+*Replace with actual screenshot path*
 
-## Overview
+A feature-rich spreadsheet web application replicating core Google Sheets functionality with enhanced data quality features.
 
-GoogleSheetClone is a web-based application that mimics the core functionality of Google Sheets. It allows users to create, edit, and manage spreadsheets online. The app supports basic spreadsheet operations such as adding, deleting, and modifying rows and columns, as well as performing calculations and formatting cells.
+## ✨ Key Features
 
-## Features
+### 📊 Spreadsheet Interface
+- **Google Sheets-like UI** with toolbar, formula bar, and grid layout
+- **Drag-and-drop functionality** for cells and ranges
+- **Cell dependency tracking** with automatic updates
+- **Formatting options**: Bold, italics, font size, color
+- **Row/Column management**: Add/delete rows/columns, resize controls
 
-- **Real-time Editing**: Multiple users can edit the same spreadsheet simultaneously.
-- **Basic Spreadsheet Operations**: Add, delete, and modify rows and columns.
-- **Cell Formatting**: Change cell colors, fonts, and text alignment.
-- **Formulas and Calculations**: Support for basic formulas like SUM, AVERAGE, and more.
-- **Data Import/Export**: Import and export data in CSV format.
-- **User Authentication**: Secure login and registration system.
-- **Responsive Design**: Works seamlessly on both desktop and mobile devices.
-
-## Technologies Used
-
-- **Frontend**: React.js, Redux, Material-UI
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB
-- **Real-time Communication**: Socket.io
-- **Authentication**: JSON Web Tokens (JWT)
-- **Deployment**: Docker, Kubernetes, AWS
-
-## Installation
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- MongoDB (v4 or higher)
-
+### 🧮 Mathematical Functions
+```plaintext
+SUM(), AVERAGE(), MAX(), MIN(), COUNT()
+```
+```Data Quality Functions
+TRIM(), UPPER(), LOWER(), REMOVE_DUPLICATES(), FIND_AND_REPLACE()
+```
+### Data Entry Validations
+- **Allow users to input various data types (numbers, text, dates).
+- **Implement basic data validation checks (e.g., ensuring numeric cells only contain numbers).
+## More Advanced Features
+- **Implement additional mathematical and data quality functions.
+- **Add support for more complex formulas and cell referencing (e.g., relative and absolute references).
+- **Allow users to save and load their spreadsheets.
+- **Incorporate data visualization capabilities (e.g., charts, graphs).
