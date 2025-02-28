@@ -1,70 +1,37 @@
-# Getting Started with Create React App
+#!/bin/bash
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Define the content of the README.md file
+read -r -d '' README_CONTENT << 'EOF'
+# GoogleSheetClone App
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+GoogleSheetClone is a web-based application that mimics the core functionality of Google Sheets. It allows users to create, edit, and manage spreadsheets online. The app supports basic spreadsheet operations such as adding, deleting, and modifying rows and columns, as well as performing calculations and formatting cells.
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Real-time Editing**: Multiple users can edit the same spreadsheet simultaneously.
+- **Basic Spreadsheet Operations**: Add, delete, and modify rows and columns.
+- **Cell Formatting**: Change cell colors, fonts, and text alignment.
+- **Formulas and Calculations**: Support for basic formulas like SUM, AVERAGE, and more.
+- **Data Import/Export**: Import and export data in CSV format.
+- **User Authentication**: Secure login and registration system.
+- **Responsive Design**: Works seamlessly on both desktop and mobile devices.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Technologies Used
 
-### `npm test`
+- **Frontend**: React.js, Redux, Material-UI
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB
+- **Real-time Communication**: Socket.io
+- **Authentication**: JSON Web Tokens (JWT)
+- **Deployment**: Docker, Kubernetes, AWS
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation
 
-### `npm run build`
+### Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- MongoDB (v4 or higher)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
